@@ -73,7 +73,7 @@ $token = $provider->getAccessToken('authorization_code', [
 try {
 
     // We got an access token, let's make some requests
-    $vendApi = $vend->vendApi($token);
+    $vendApi = $provider->vendApi($token);
     $sale = $vendApi->getSale($vendSaleID);
     $registers = $vendApi->getRegisters();
 
@@ -106,6 +106,7 @@ Please see [CONTRIBUTING](https://github.com/ursuleacv/oauth2-vend/blob/master/C
 ## Credits
 
 - [Valentin Ursuleac](https://github.com/ursuleacv)
+- [brucealdridge](https://github.com/brucealdridge/VendAPI) - original library
 
 ## License
 
