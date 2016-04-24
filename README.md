@@ -74,7 +74,7 @@ try {
 
     // We got an access token, let's make some requests
     $vendApi = $provider->vendApi($token);
-    $sale = $vendApi->getSale($vendSaleID);
+    $sale = $vendApi->getSale(1);
     $registers = $vendApi->getRegisters();
 
     echo '<pre>';

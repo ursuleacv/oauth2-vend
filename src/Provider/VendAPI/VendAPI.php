@@ -27,7 +27,7 @@ class VendAPI
      * @var mixed
      */
     private $debug = false;
-    
+
     /**
      * Request all pages of the results, looping through returning as a single result set
      * @var boolean
@@ -400,9 +400,7 @@ class VendAPI
         $depage = $depage === null ? $this->automatic_depage : $depage;
         if ($data !== null) {
             // setup for a post
-
-            $rawresult = $this->requestr->post($path, ['data' => json_encode($data)]);
-
+            $rawresult = $this->requestr->post($path, json_encode($data));
         } else {
             // reset to a get
             $rawresult = $this->requestr->get($path);
