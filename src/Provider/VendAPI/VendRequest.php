@@ -127,6 +127,22 @@ class VendRequest
 
     /**
      * @param $path
+     * @return mixed
+     */
+    public function delete($path)
+    {
+        $this->setOpt(
+            array(
+                CURLOPT_POSTFIELDS => null,
+                CURLOPT_CUSTOMREQUEST => 'DELETE',
+            )
+        );
+        $this->posted = '';
+        return $this->request($path, 'delete');
+    }
+
+    /**
+     * @param $path
      * @param $type
      * @return mixed
      */

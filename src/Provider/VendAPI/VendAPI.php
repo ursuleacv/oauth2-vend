@@ -46,6 +46,9 @@ class VendAPI
      */
     public $allow_time_slip = true;
 
+    private $tokenType;
+    private $token;
+
     /**
      * @param string $url          url of your shop eg https://shopname.vendhq.com
      * @param string $tokenType    tokenType for api
@@ -56,6 +59,9 @@ class VendAPI
     {
         // trim trailing slash for niceness
         $this->url = rtrim($url, '/');
+
+        $this->tokenType = $tokenType;
+        $this->token = $accessToken;
 
         $this->requestr = new VendRequest($url, $tokenType, $accessToken);
 
@@ -74,6 +80,52 @@ class VendAPI
     public function __destruct()
     {
 
+    }
+
+    /**
+     * Get a single webhook by id
+     *
+     * @param string $id id of the webhook to get
+     *
+     * @return object
+     */
+    public function getWebhook($id)
+    {
+        $result = $this->getWebhooks(array('id' => $id));
+        return is_array($result) && isset($result[0]) ? $result[0] : new VendWebhook(null, $this);
+    }
+
+    /**
+     * Get all webhooks
+     *
+     * @param array $options
+     * @return array
+     */
+    public function getWebhooks($options = array())
+    {
+        $path = '';
+        if (count($options)) {
+            foreach ($options as $k => $v) {
+                $v = urlencode($v); // ensure values with spaces etc are encoded properly
+                $path .= '/' . $k . '/' . $v;
+            }
+        }
+
+        return $this->apiGetWebhooks($path);
+    }
+
+    /**
+     * Get a single webhook by id
+     *
+     * @param string $id id of the webhook to get
+     *
+     * @return object
+     */
+    public function deleteWebhook($id)
+    {
+        $path = '/' . urlencode($id);
+
+        return $this->apiDeleteWebhook($path);
     }
 
     /**
@@ -339,14 +391,68 @@ class VendAPI
     }
 
     /**
+     * @param $path
+     * @return array
+     * @throws Exception
+     */
+    private function apiGetWebhooks($path)
+    {
+        $result = $this->apiRequest('/api/webhooks' . $path);
+        if (!is_array($result)) {
+            throw new \Exception("Error: Unexpected result for request");
+        }
+        $webhooks = array();
+        foreach ($result as $r) {
+            $webhooks[] = new VendWebhook($r, $this);
+        }
+
+        return $webhooks;
+    }
+
+    /**
      * Create new Webhook
      * @param object $product
      * @return object
      */
-    public function createWebook($webhook)
+    public function createWebook($webhookData)
     {
-        $result = $this->apiRequest('/api/webhooks', $webhook->toArray());
+        $postData = 'data=' . json_encode($webhookData);
 
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->url . '/api/webhooks');
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/x-www-form-urlencoded',
+            'Authorization: ' . $this->tokenType . ' ' . $this->token,
+        ));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $curlResult = curl_exec($ch);
+        $curlStatus = curl_getinfo($ch);
+        $httpCode = $curlStatus['http_code'];
+        $result = json_decode($curlResult);
+
+        if ($httpCode >= 400) {
+            if (isset($result->error)) {
+                $apiError = 'Error: ' . json_encode($result->error) . ' path: /api/webhooks';
+            } else {
+                $apiError = "Error: Unexpected HTTP " . $httpCode . " result from API";
+            }
+
+            throw new \Exception($apiError, (int) $httpCode);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $path
+     * @return array
+     * @throws Exception
+     */
+    private function apiDeleteWebhook($path)
+    {
+        $result = $this->apiRequest('/api/webhooks' . $path, null, null, $type = 'delete');
         return $result;
     }
 
@@ -395,10 +501,12 @@ class VendAPI
      *
      * @return object variable result based on request
      */
-    private function apiRequest($path, $data = null, $depage = null)
+    private function apiRequest($path, $data = null, $depage = null, $type = null)
     {
         $depage = $depage === null ? $this->automatic_depage : $depage;
-        if ($data !== null) {
+        if ($type!== null && $type == 'delete') {
+            $rawresult = $this->requestr->delete($path);
+        } elseif ($data !== null) {
             // setup for a post
             $rawresult = $this->requestr->post($path, json_encode($data));
         } else {
