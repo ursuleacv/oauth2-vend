@@ -81,6 +81,27 @@ class VendAPI
     {
 
     }
+    
+    /**
+     * Update customer
+     * @param object $customer
+     * @return object
+     */
+    public function updateCustomer($customer)
+    {
+        $result = $this->apiRequest('/api/customers', $customer);
+        return new VendCustomer($result->customer, $this);
+    }
+
+    /**
+     * Update config
+     * @return object
+     */
+    public function getConfig()
+    {
+        $result = $this->apiRequest('/api/config');
+        return $result;
+    }
 
     /**
      * Get a single webhook by id
