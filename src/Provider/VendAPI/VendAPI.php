@@ -50,9 +50,9 @@ class VendAPI
     private $token;
 
     /**
-     * @param string $url          url of your shop eg https://shopname.vendhq.com
-     * @param string $tokenType    tokenType for api
-     * @param string $accessToken  accessToken for api
+     * @param string $url url of your shop eg https://shopname.vendhq.com
+     * @param string $tokenType tokenType for api
+     * @param string $accessToken accessToken for api
      * @param string $requestClass used for testing
      */
     public function __construct($url, $tokenType, $accessToken)
@@ -64,7 +64,6 @@ class VendAPI
         $this->token = $accessToken;
 
         $this->requestr = new VendRequest($url, $tokenType, $accessToken);
-
     }
 
     /**
@@ -79,9 +78,9 @@ class VendAPI
 
     public function __destruct()
     {
-
+        //
     }
-    
+
     /**
      * Update customer
      * @param object $customer
@@ -374,6 +373,7 @@ class VendAPI
 
         return $customers;
     }
+
     /**
      * @param $path
      * @return mixed
@@ -516,8 +516,8 @@ class VendAPI
     /**
      * make request to the vend api
      *
-     * @param string  $path   the url to request
-     * @param array   $data   optional - if sending a post request, send fields through here
+     * @param string $path the url to request
+     * @param array $data optional - if sending a post request, send fields through here
      * @param boolean $depage do you want to grab and merge page results? .. will only depage on first page
      *
      * @return object variable result based on request
@@ -525,7 +525,7 @@ class VendAPI
     private function apiRequest($path, $data = null, $depage = null, $type = null)
     {
         $depage = $depage === null ? $this->automatic_depage : $depage;
-        if ($type!== null && $type == 'delete') {
+        if ($type !== null && $type == 'delete') {
             $rawresult = $this->requestr->delete($path);
         } elseif ($data !== null) {
             // setup for a post
