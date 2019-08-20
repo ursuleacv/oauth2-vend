@@ -14,7 +14,7 @@ class FooVendProvider extends Vend
     }
 }
 
-class VendTest extends \PHPUnit_Framework_TestCase
+class VendTest extends \PHPUnit\Framework\TestCase
 {
 
     /**
